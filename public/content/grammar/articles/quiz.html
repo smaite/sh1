@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles Quiz | Grammar | SEE English Learning Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/aibot.css">
+  <style>
+    .quiz-container {
+      background: var(--card-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 40px auto;
+      max-width: 800px;
+    }
+    .quiz-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      text-align: left;
+    }
+    .quiz-btn:hover:not(:disabled) {
+      background: rgba(102, 126, 234, 0.3);
+      transform: translateX(10px);
+    }
+    .quiz-btn.correct {
+      background: #27ae60 !important;
+      border-color: #27ae60 !important;
+    }
+    .quiz-btn.wrong {
+      background: #e74c3c !important;
+      border-color: #e74c3c !important;
+    }
+    .score-display {
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--accent-color);
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      transition: width 0.3s ease;
+    }
+    .explanation {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-left: 4px solid var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <nav>
+    <div class="container">
+      <ul>
+        <li><a href="../../index.html" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="../articles/index.html" class="nav-link"><i class="fas fa-book"></i> Articles Lesson</a></li>
+        <li><a href="../preposition/index.html" class="nav-link">Next Topic <i class="fas fa-arrow-right"></i></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header style="padding: 100px 0 60px;">
+    <div class="container">
+      <h1 class="glow-text">Articles Quiz</h1>
+      <p>Test your knowledge of A, An, and The</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="quiz-container">
+        <h2 style="text-align: center; margin-bottom: 30px;"><i class="fas fa-circle"></i> Articles Practice Quiz</h2>
+        
+        <div id="quiz-start">
+          <p style="text-align: center; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.8;">
+            📝 20 questions about articles<br>
+            ✅ +1 for correct answers<br>
+            ❌ -0.5 for wrong answers<br>
+            📚 Learn from explanations
+          </p>
+          <button class="btn-primary" style="display: block; margin: 0 auto;" onclick="startQuiz()">
+            <i class="fas fa-play"></i> Start Quiz
+          </button>
+        </div>
+
+        <div id="quiz-game" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="score-display">
+            Score: <span id="score">0</span> | Question: <span id="q-number">1</span>/20
+          </div>
+          <h3 id="question" style="margin: 30px 0; font-size: 1.4rem;"></h3>
+          <div id="options"></div>
+          <div class="explanation" id="explanation" style="display: none;">
+            <h4><i class="fas fa-lightbulb"></i> Explanation</h4>
+            <p id="explanation-text"></p>
+          </div>
+          <button class="btn-primary" id="next-btn" style="margin-top: 20px;" disabled>
+            Next Question <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div id="quiz-end" style="display: none; text-align: center;">
+          <h2 style="font-size: 2.5rem; margin-bottom: 20px;">🎉 Quiz Complete!</h2>
+          <div style="font-size: 3rem; margin: 30px 0;">
+            <span id="final-score"></span>/20
+          </div>
+          <p id="performance-message" style="font-size: 1.3rem; margin-bottom: 30px; color: var(--accent-color);"></p>
+          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="location.reload()">
+              <i class="fas fa-redo"></i> Try Again
+            </button>
+            <a href="../articles/index.html" class="btn-primary" style="text-decoration: none;">
+              <i class="fas fa-book"></i> Review Lesson
+            </a>
+            <a href="../../index.html" class="btn-primary" style="text-decoration: none;">
+              <i class="fas fa-home"></i> Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 SEE English Learning Hub. Developed with <i class="fas fa-heart" style="color: #f5576c;"></i> by <strong>Nabaraj Dhungana</strong></p>
+    </div>
+  </footer>
+
+  <script src="../../js/effects.js"></script>
+  <script src="../../js/aibot.js"></script>
+  <script>
+    // 20 Article Questions
+    const questions = [
+      { q: "Choose the correct article: ___ apple a day keeps the doctor away.", options: ["A", "An", "The", "No article"], correct: 1, explanation: "We use 'an' before words starting with vowel sounds. 'Apple' starts with the vowel sound /æ/." },
+      { q: "Fill in the blank: She is ___ honest person.", options: ["A", "An", "The", "No article"], correct: 1, explanation: "'Honest' starts with the vowel sound /ɒ/ (the 'h' is silent), so we use 'an'." },
+      { q: "Choose the correct article: I saw ___ elephant at the zoo.", options: ["A", "An", "The", "No article"], correct: 1, explanation: "'Elephant' starts with a vowel sound /e/, so we use 'an'." },
+      { q: "Fill in the blank: He is ___ university student.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "Although 'university' starts with 'u', it has the consonant sound /j/ (yoo-niversity), so we use 'a'." },
+      { q: "Choose the correct article: ___ sun rises in the east.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' for unique things - there is only one sun in our solar system." },
+      { q: "Fill in the blank: I need ___ pen to write.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "We use 'a' before consonant sounds for non-specific singular countable nouns." },
+      { q: "Choose the correct article: She plays ___ guitar very well.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' before musical instruments." },
+      { q: "Fill in the blank: Mount Everest is ___ highest peak in the world.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' with superlatives (highest, tallest, best, etc.)." },
+      { q: "Choose the correct article: I had ___ lunch at 1 PM.", options: ["A", "An", "The", "No article"], correct: 3, explanation: "We generally don't use articles before meals (breakfast, lunch, dinner)." },
+      { q: "Fill in the blank: ___ Pacific Ocean is the largest ocean.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' with the names of oceans, seas, rivers, and mountain ranges." },
+      { q: "Choose the correct article: She is ___ European.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "'European' starts with the consonant sound /j/ (yoo-ropean), so we use 'a'." },
+      { q: "Fill in the blank: I love to eat ___ rice.", options: ["A", "An", "The", "No article"], correct: 3, explanation: "We don't use articles with uncountable nouns when speaking generally." },
+      { q: "Choose the correct article: He is ___ one-eyed man.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "'One' starts with the consonant sound /w/, so we use 'a'." },
+      { q: "Fill in the blank: ___ Ganga is a sacred river.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' with river names. 'The Ganga' or 'The Ganges'." },
+      { q: "Choose the correct article: She bought ___ useful book.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "'Useful' starts with the consonant sound /j/ (yoo-sful), so we use 'a'." },
+      { q: "Fill in the blank: I have ___ headache.", options: ["A", "An", "The", "No article"], correct: 0, explanation: "We use 'a' with certain expressions like 'a headache', 'a cold', 'a fever'." },
+      { q: "Choose the correct article: ___ honest man always speaks truth.", options: ["A", "An", "The", "No article"], correct: 1, explanation: "'Honest' starts with the vowel sound /ɒ/, and we're referring to any honest person in general." },
+      { q: "Fill in the blank: Can you play ___ basketball?", options: ["A", "An", "The", "No article"], correct: 3, explanation: "We don't use articles with sports and games (basketball, cricket, football, chess)." },
+      { q: "Choose the correct article: She is ___ MLA.", options: ["A", "An", "The", "No article"], correct: 1, explanation: "'MLA' starts with the vowel sound /e/ (em-el-aay), so we use 'an'." },
+      { q: "Fill in the blank: ___ rich should help the poor.", options: ["A", "An", "The", "No article"], correct: 2, explanation: "We use 'the' with adjectives to represent a class of people (the rich, the poor, the elderly)." }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function startQuiz() {
+      document.getElementById('quiz-start').style.display = 'none';
+      document.getElementById('quiz-game').style.display = 'block';
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questions[currentQ];
+      document.getElementById('q-number').textContent = currentQ + 1;
+      document.getElementById('question').textContent = q.q;
+      
+      // Update progress bar
+      const progress = ((currentQ + 1) / 20) * 100;
+      document.getElementById('progress-bar').style.width = progress + '%';
+      
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-btn';
+        btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}`;
+        btn.onclick = () => checkAnswer(idx, q.correct, q.explanation);
+        optionsDiv.appendChild(btn);
+      });
+      
+      document.getElementById('explanation').style.display = 'none';
+      document.getElementById('next-btn').disabled = true;
+    }
+
+    function checkAnswer(selected, correct, explanation) {
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === correct) {
+          btn.classList.add('correct');
+        } else if (idx === selected && idx !== correct) {
+          btn.classList.add('wrong');
+        }
+      });
+      
+      if (selected === correct) {
+        score++;
+      } else {
+        score -= 0.5;
+      }
+      
+      document.getElementById('score').textContent = score.toFixed(1);
+      document.getElementById('explanation-text').textContent = explanation;
+      document.getElementById('explanation').style.display = 'block';
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    document.getElementById('next-btn').onclick = function() {
+      currentQ++;
+      if (currentQ >= 20) {
+        endQuiz();
+      } else {
+        loadQuestion();
+      }
+    };
+
+    function endQuiz() {
+      document.getElementById('quiz-game').style.display = 'none';
+      document.getElementById('quiz-end').style.display = 'block';
+      document.getElementById('final-score').textContent = score.toFixed(1);
+      
+      let message = '';
+      if (score >= 16) message = '🏆 Excellent! You are an Articles Master!';
+      else if (score >= 12) message = '⭐ Great job! Very good understanding!';
+      else if (score >= 8) message = '👍 Good effort! Keep practicing!';
+      else if (score >= 4) message = '📚 Nice try! Review the lesson!';
+      else message = '💪 Keep practicing! You will improve!';
+      
+      document.getElementById('performance-message').textContent = message;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GK Quiz | SEE English Learning Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/aibot.css">
+  <style>
+    .quiz-container {
+      background: var(--card-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 40px auto;
+      max-width: 800px;
+    }
+    .quiz-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      text-align: left;
+      padding-left: 20px;
+    }
+    .quiz-btn:hover:not(:disabled) {
+      background: rgba(102, 126, 234, 0.3);
+      transform: translateX(10px);
+      border-color: var(--primary-color);
+    }
+    .quiz-btn.correct {
+      background: #27ae60 !important;
+      border-color: #27ae60 !important;
+    }
+    .quiz-btn.wrong {
+      background: #e74c3c !important;
+      border-color: #e74c3c !important;
+    }
+    .quiz-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+    .score-display {
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--accent-color);
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 15px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      transition: width 0.3s ease;
+    }
+    .timer {
+      font-size: 1.2rem;
+      text-align: center;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
+    }
+    .timer.warning {
+      color: #f39c12;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .explanation {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-left: 4px solid var(--accent-color);
+    }
+    .explanation h4 {
+      color: var(--accent-color);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <nav>
+    <div class="container">
+      <ul>
+        <li><a href="../../index.html" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="../../index.html#grammar" class="nav-link"><i class="fas fa-book"></i> Grammar</a></li>
+        <li><a href="../../index.html#writing" class="nav-link"><i class="fas fa-pen"></i> Writing</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header style="padding: 100px 0 60px;">
+    <div class="container">
+      <h1 class="glow-text">GK Quiz</h1>
+      <p>Test your General Knowledge</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="quiz-container">
+        <h2 style="text-align: center; margin-bottom: 30px;"><i class="fas fa-brain"></i> General Knowledge Quiz</h2>
+        
+        <div id="quiz-start">
+          <p style="text-align: center; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.8;">
+            🎯 Challenge yourself with 50 questions!<br>
+            ⏱️ 30 seconds per question<br>
+            ✅ +1 for correct answers<br>
+            ❌ -0.5 for wrong answers<br>
+            📚 Learn from detailed explanations
+          </p>
+          <button class="btn-primary" style="display: block; margin: 0 auto;" onclick="startQuiz()">
+            <i class="fas fa-play"></i> Start Quiz
+          </button>
+        </div>
+
+        <div id="quiz-game" style="display: none;">
+          <div class="timer" id="timer">Time: 30s</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="score-display">
+            Score: <span id="score">0</span> | Question: <span id="q-number">1</span>/50
+          </div>
+          <h3 id="question" style="margin: 30px 0; font-size: 1.4rem; line-height: 1.6;"></h3>
+          <div id="options"></div>
+          <div class="explanation" id="explanation" style="display: none;">
+            <h4><i class="fas fa-lightbulb"></i> Explanation</h4>
+            <p id="explanation-text"></p>
+          </div>
+          <button class="btn-primary" id="next-btn" style="margin-top: 20px;" disabled>
+            Next Question <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div id="quiz-end" style="display: none; text-align: center;">
+          <h2 style="font-size: 2.5rem; margin-bottom: 20px;">🎉 Quiz Complete!</h2>
+          <div style="font-size: 3rem; margin: 30px 0;">
+            <span id="final-score"></span>/50
+          </div>
+          <p id="performance-message" style="font-size: 1.3rem; margin-bottom: 30px; color: var(--accent-color);"></p>
+          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="location.reload()">
+              <i class="fas fa-redo"></i> Play Again
+            </button>
+            <a href="../../index.html" class="btn-primary" style="text-decoration: none;">
+              <i class="fas fa-home"></i> Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 SEE English Learning Hub. Developed with <i class="fas fa-heart" style="color: #f5576c;"></i> by <strong>Nabaraj Dhungana</strong></p>
+    </div>
+  </footer>
+
+  <script src="../../js/effects.js"></script>
+  <script src="../../js/aibot.js"></script>
+  <script>
+    // 50 Real GK Questions
+    const questions = [
+      { 
+        q: "What is the capital city of Nepal?", 
+        options: ["Pokhara", "Kathmandu", "Lalitpur", "Bhaktapur"], 
+        correct: 1,
+        explanation: "Kathmandu is the capital and largest city of Nepal, located in the Kathmandu Valley."
+      },
+      { 
+        q: "Who is known as the 'Father of the Nation' in India?", 
+        options: ["Jawaharlal Nehru", "Mahatma Gandhi", "Subhas Chandra Bose", "Bhagat Singh"], 
+        correct: 1,
+        explanation: "Mahatma Gandhi is known as the Father of the Nation in India for his role in the independence movement."
+      },
+      { 
+        q: "What is the largest planet in our solar system?", 
+        options: ["Saturn", "Neptune", "Jupiter", "Uranus"], 
+        correct: 2,
+        explanation: "Jupiter is the largest planet in our solar system, with a diameter of about 139,820 km."
+      },
+      { 
+        q: "Which is the longest river in the world?", 
+        options: ["Amazon", "Nile", "Yangtze", "Mississippi"], 
+        correct: 1,
+        explanation: "The Nile River is traditionally considered the longest river at about 6,650 km."
+      },
+      { 
+        q: "Who wrote the famous play 'Romeo and Juliet'?", 
+        options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"], 
+        correct: 1,
+        explanation: "William Shakespeare wrote Romeo and Juliet around 1594-1596, one of his most famous tragedies."
+      },
+      { 
+        q: "What is the chemical symbol for gold?", 
+        options: ["Go", "Gd", "Au", "Ag"], 
+        correct: 2,
+        explanation: "Au comes from the Latin word 'aurum' meaning gold."
+      },
+      { 
+        q: "Which is the smallest continent by land area?", 
+        options: ["Europe", "Australia", "Antarctica", "South America"], 
+        correct: 1,
+        explanation: "Australia is the smallest continent, covering about 7.7 million square kilometers."
+      },
+      { 
+        q: "What is the speed of light approximately?", 
+        options: ["300,000 km/s", "150,000 km/s", "500,000 km/s", "100,000 km/s"], 
+        correct: 0,
+        explanation: "Light travels at approximately 299,792 kilometers per second in a vacuum."
+      },
+      { 
+        q: "Who invented the telephone?", 
+        options: ["Thomas Edison", "Alexander Graham Bell", "Nikola Tesla", "Guglielmo Marconi"], 
+        correct: 1,
+        explanation: "Alexander Graham Bell is credited with inventing the first practical telephone in 1876."
+      },
+      { 
+        q: "What is the national animal of Nepal?", 
+        options: ["Tiger", "Elephant", "Cow", "One-horned Rhinoceros"], 
+        correct: 2,
+        explanation: "The cow is the national animal of Nepal and is considered sacred in Hindu culture."
+      },
+      { 
+        q: "Which gas do plants absorb from the atmosphere?", 
+        options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], 
+        correct: 2,
+        explanation: "Plants absorb Carbon Dioxide (CO2) during photosynthesis and release oxygen."
+      },
+      { 
+        q: "Who was the first person to walk on the moon?", 
+        options: ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Michael Collins"], 
+        correct: 1,
+        explanation: "Neil Armstrong was the first human to walk on the moon on July 20, 1969."
+      },
+      { 
+        q: "What is the largest organ in the human body?", 
+        options: ["Liver", "Brain", "Skin", "Heart"], 
+        correct: 2,
+        explanation: "The skin is the largest organ, covering about 2 square meters in adults."
+      },
+      { 
+        q: "Which country is known as the 'Land of the Rising Sun'?", 
+        options: ["China", "Japan", "Korea", "Thailand"], 
+        correct: 1,
+        explanation: "Japan is called the Land of the Rising Sun because 'Nippon' means 'origin of the sun'."
+      },
+      { 
+        q: "What is the hardest natural substance on Earth?", 
+        options: ["Gold", "Iron", "Diamond", "Platinum"], 
+        correct: 2,
+        explanation: "Diamond is the hardest known natural material, rated 10 on the Mohs hardness scale."
+      },
+      { 
+        q: "How many continents are there on Earth?", 
+        options: ["5", "6", "7", "8"], 
+        correct: 2,
+        explanation: "There are 7 continents: Asia, Africa, North America, South America, Antarctica, Europe, and Australia."
+      },
+      { 
+        q: "What is the main component of the sun?", 
+        options: ["Oxygen", "Carbon", "Hydrogen", "Nitrogen"], 
+        correct: 2,
+        explanation: "The sun is about 73% hydrogen, which undergoes nuclear fusion to produce energy."
+      },
+      { 
+        q: "Who painted the Mona Lisa?", 
+        options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"], 
+        correct: 2,
+        explanation: "Leonardo da Vinci painted the Mona Lisa between 1503 and 1519."
+      },
+      { 
+        q: "What is the currency of Japan?", 
+        options: ["Yuan", "Won", "Yen", "Ringgit"], 
+        correct: 2,
+        explanation: "The Japanese Yen (¥) is the official currency of Japan."
+      },
+      { 
+        q: "Which is the largest ocean on Earth?", 
+        options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"], 
+        correct: 3,
+        explanation: "The Pacific Ocean is the largest, covering about 63 million square miles."
+      },
+      { 
+        q: "What is the powerhouse of the cell?", 
+        options: ["Nucleus", "Mitochondria", "Ribosome", "Chloroplast"], 
+        correct: 1,
+        explanation: "Mitochondria produce ATP, the cell's main energy currency through cellular respiration."
+      },
+      { 
+        q: "Who wrote the national anthem of Nepal?", 
+        options: ["Laxmi Prasad Devkota", "Byakul Maila", "Bhanubhakta Acharya", "Madhav Prasad Ghimire"], 
+        correct: 1,
+        explanation: "Byakul Maila (Ambar Gurung composed the music) wrote 'Sayaun Thunga Phulka Hami'."
+      },
+      { 
+        q: "What is the freezing point of water?", 
+        options: ["0°C", "100°C", "50°C", "25°C"], 
+        correct: 0,
+        explanation: "Water freezes at 0 degrees Celsius (32°F) at standard atmospheric pressure."
+      },
+      { 
+        q: "Which planet is known as the Red Planet?", 
+        options: ["Venus", "Mars", "Jupiter", "Saturn"], 
+        correct: 1,
+        explanation: "Mars appears red due to iron oxide (rust) on its surface."
+      },
+      { 
+        q: "What is the largest mammal in the world?", 
+        options: ["African Elephant", "Blue Whale", "Giraffe", "Polar Bear"], 
+        correct: 1,
+        explanation: "The Blue Whale is the largest animal ever known to have lived, up to 100 feet long."
+      },
+      { 
+        q: "Which vitamin is produced when skin is exposed to sunlight?", 
+        options: ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E"], 
+        correct: 2,
+        explanation: "Vitamin D is synthesized in the skin when exposed to UVB radiation from sunlight."
+      },
+      { 
+        q: "What is the capital of France?", 
+        options: ["London", "Berlin", "Paris", "Madrid"], 
+        correct: 2,
+        explanation: "Paris is the capital and most populous city of France."
+      },
+      { 
+        q: "Who discovered penicillin?", 
+        options: ["Marie Curie", "Louis Pasteur", "Alexander Fleming", "Joseph Lister"], 
+        correct: 2,
+        explanation: "Alexander Fleming discovered penicillin in 1928, revolutionizing medicine."
+      },
+      { 
+        q: "What is the smallest prime number?", 
+        options: ["0", "1", "2", "3"], 
+        correct: 2,
+        explanation: "2 is the smallest and only even prime number."
+      },
+      { 
+        q: "Which river is considered sacred in Hinduism?", 
+        options: ["Yamuna", "Godavari", "Ganga", "Kaveri"], 
+        correct: 2,
+        explanation: "The Ganga (Ganges) is the most sacred river in Hinduism."
+      },
+      { 
+        q: "What is the chemical formula for water?", 
+        options: ["CO2", "H2O", "NaCl", "O2"], 
+        correct: 1,
+        explanation: "H2O means two hydrogen atoms and one oxygen atom per molecule."
+      },
+      { 
+        q: "Which country has the largest population?", 
+        options: ["India", "China", "USA", "Indonesia"], 
+        correct: 1,
+        explanation: "China has the world's largest population with over 1.4 billion people."
+      },
+      { 
+        q: "What is the tallest mountain in the world?", 
+        options: ["K2", "Mount Everest", "Kangchenjunga", "Lhotse"], 
+        correct: 1,
+        explanation: "Mount Everest is 8,849 meters (29,032 feet) above sea level."
+      },
+      { 
+        q: "Who invented the light bulb?", 
+        options: ["Nikola Tesla", "Thomas Edison", "Benjamin Franklin", "Michael Faraday"], 
+        correct: 1,
+        explanation: "Thomas Edison developed the first commercially practical incandescent light bulb in 1879."
+      },
+      { 
+        q: "What is the largest desert in the world?", 
+        options: ["Sahara", "Arabian", "Gobi", "Antarctica"], 
+        correct: 3,
+        explanation: "Antarctica is technically the largest desert as it receives very little precipitation."
+      },
+      { 
+        q: "How many bones are in the adult human body?", 
+        options: ["106", "206", "306", "406"], 
+        correct: 1,
+        explanation: "Adults have 206 bones, while babies are born with about 270 bones."
+      },
+      { 
+        q: "What is the currency of the United Kingdom?", 
+        options: ["Euro", "Dollar", "Pound Sterling", "Franc"], 
+        correct: 2,
+        explanation: "The Pound Sterling (£) is the official currency of the United Kingdom."
+      },
+      { 
+        q: "Which element has the chemical symbol 'Fe'?", 
+        options: ["Fluorine", "Iron", "Francium", "Fermium"], 
+        correct: 1,
+        explanation: "Fe comes from the Latin word 'ferrum' meaning iron."
+      },
+      { 
+        q: "Who is the author of 'Harry Potter'?", 
+        options: ["J.R.R. Tolkien", "J.K. Rowling", "C.S. Lewis", "George R.R. Martin"], 
+        correct: 1,
+        explanation: "J.K. Rowling wrote the Harry Potter series, first published in 1997."
+      },
+      { 
+        q: "What is the largest island in the world?", 
+        options: ["Australia", "Greenland", "New Guinea", "Borneo"], 
+        correct: 1,
+        explanation: "Greenland is the world's largest island, covering 2.166 million km²."
+      },
+      { 
+        q: "Which gas makes up about 78% of Earth's atmosphere?", 
+        options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], 
+        correct: 2,
+        explanation: "Nitrogen (N2) comprises about 78% of Earth's atmosphere."
+      },
+      { 
+        q: "What is the boiling point of water at sea level?", 
+        options: ["90°C", "100°C", "110°C", "120°C"], 
+        correct: 1,
+        explanation: "Water boils at 100°C (212°F) at standard atmospheric pressure (1 atm)."
+      },
+      { 
+        q: "Who was the first President of the United States?", 
+        options: ["Thomas Jefferson", "John Adams", "George Washington", "Benjamin Franklin"], 
+        correct: 2,
+        explanation: "George Washington was the first U.S. President, serving from 1789 to 1797."
+      },
+      { 
+        q: "What is the longest bone in the human body?", 
+        options: ["Spine", "Femur", "Tibia", "Humerus"], 
+        correct: 1,
+        explanation: "The femur (thigh bone) is the longest and strongest bone in the body."
+      },
+      { 
+        q: "Which country is known as the 'Land of Thousand Lakes'?", 
+        options: ["Sweden", "Norway", "Finland", "Canada"], 
+        correct: 2,
+        explanation: "Finland has about 188,000 lakes and is known as the Land of Thousand Lakes."
+      },
+      { 
+        q: "What does DNA stand for?", 
+        options: ["Deoxyribonucleic Acid", "Dinucleic Acid", "Deoxynucleic Acid", "Double Nucleic Acid"], 
+        correct: 0,
+        explanation: "DNA stands for Deoxyribonucleic Acid, the molecule that carries genetic instructions."
+      },
+      { 
+        q: "Which is the fastest land animal?", 
+        options: ["Lion", "Cheetah", "Leopard", "Gazelle"], 
+        correct: 1,
+        explanation: "Cheetahs can reach speeds up to 70-75 mph (112-120 km/h) in short bursts."
+      },
+      { 
+        q: "What is the national flower of Nepal?", 
+        options: ["Rose", "Lotus", "Rhododendron", "Sunflower"], 
+        correct: 2,
+        explanation: "The Rhododendron (Lali Gurans) is the national flower of Nepal."
+      },
+      { 
+        q: "How many chambers are in the human heart?", 
+        options: ["2", "3", "4", "5"], 
+        correct: 2,
+        explanation: "The heart has 4 chambers: right atrium, right ventricle, left atrium, and left ventricle."
+      },
+      { 
+        q: "Which is the most spoken language in the world?", 
+        options: ["English", "Spanish", "Mandarin Chinese", "Hindi"], 
+        correct: 2,
+        explanation: "Mandarin Chinese has the most native speakers, with over 900 million speakers."
+      }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 30;
+
+    function startQuiz() {
+      document.getElementById('quiz-start').style.display = 'none';
+      document.getElementById('quiz-game').style.display = 'block';
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questions[currentQ];
+      document.getElementById('q-number').textContent = currentQ + 1;
+      document.getElementById('question').textContent = q.q;
+      
+      // Update progress bar
+      const progress = ((currentQ + 1) / 50) * 100;
+      document.getElementById('progress-bar').style.width = progress + '%';
+      
+      // Reset timer
+      timeLeft = 30;
+      updateTimer();
+      startTimer();
+      
+      const optionsDiv = document.getElementById('options');
+      optionsDiv.innerHTML = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-btn';
+        btn.innerHTML = `<strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}`;
+        btn.onclick = () => checkAnswer(idx, q.correct, q.explanation);
+        optionsDiv.appendChild(btn);
+      });
+      
+      document.getElementById('explanation').style.display = 'none';
+      document.getElementById('next-btn').disabled = true;
+      document.getElementById('next-btn').innerHTML = 'Next Question <i class="fas fa-arrow-right"></i>';
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          timeUp();
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      const timerEl = document.getElementById('timer');
+      timerEl.textContent = `Time: ${timeLeft}s`;
+      if (timeLeft <= 5) {
+        timerEl.classList.add('warning');
+      } else {
+        timerEl.classList.remove('warning');
+      }
+    }
+
+    function timeUp() {
+      const buttons = document.querySelectorAll('.quiz-btn');
+      const q = questions[currentQ];
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) btn.classList.add('correct');
+      });
+      score -= 0.5;
+      document.getElementById('score').textContent = score;
+      showExplanation(q.explanation);
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function checkAnswer(selected, correct, explanation) {
+      clearInterval(timer);
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === correct) btn.classList.add('correct');
+        else if (idx === selected && idx !== correct) btn.classList.add('wrong');
+      });
+      
+      if (selected === correct) {
+        score++;
+      } else {
+        score -= 0.5;
+      }
+      
+      document.getElementById('score').textContent = score;
+      showExplanation(explanation);
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function showExplanation(text) {
+      document.getElementById('explanation-text').textContent = text;
+      document.getElementById('explanation').style.display = 'block';
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ >= 50) {
+        endQuiz();
+      } else {
+        loadQuestion();
+      }
+    }
+
+    document.getElementById('next-btn').onclick = nextQuestion;
+
+    function endQuiz() {
+      clearInterval(timer);
+      document.getElementById('quiz-game').style.display = 'none';
+      document.getElementById('quiz-end').style.display = 'block';
+      document.getElementById('final-score').textContent = score;
+      
+      let message = '';
+      if (score >= 40) message = '🏆 Excellent! You are a GK Master!';
+      else if (score >= 30) message = '⭐ Great job! Very knowledgeable!';
+      else if (score >= 20) message = '👍 Good effort! Keep learning!';
+      else if (score >= 10) message = '📚 Nice try! Practice makes perfect!';
+      else message = '💪 Keep practicing! You will improve!';
+      
+      document.getElementById('performance-message').textContent = message;
+    }
+  </script>
+</body>
+</html>
