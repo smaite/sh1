@@ -175,7 +175,7 @@ class AINavigationBot {
 
       const startTime = Date.now();
       const response = await this.genAI.models.generateContent({
-        model: "gemini-3-flash",
+        model: "gemini-1.5-flash",
         contents: "Say 'API Connection Successful using Google GenAI SDK' if you receive this.",
       });
 
@@ -310,7 +310,7 @@ Be friendly, use examples, and help with SEE exam preparation.
 User question: ${userMessage}`;
 
     const response = await this.genAI.models.generateContent({
-      model: "gemini-3-flash",
+      model: "gemini-1.5-flash",
       contents: systemPrompt,
       generationConfig: {
         temperature: 0.8,
@@ -365,7 +365,7 @@ User question: ${userMessage}`;
       Format: Question|OptionA|OptionB|OptionC|OptionD|CorrectLetter|Explanation`;
 
       const response = await this.genAI.models.generateContent({
-        model: "gemini-3-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
         generationConfig: { temperature: 0.9, maxOutputTokens: 500 }
       });
