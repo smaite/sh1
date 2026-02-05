@@ -1,0 +1,19 @@
+.layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.main-content {
+    flex: 1;
+    position: relative;
+    z-index: var(--z-base);
+    padding: var(--spacing-xl) 0;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: var(--spacing-lg) 0;
+    }
+}
