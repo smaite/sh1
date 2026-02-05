@@ -4,13 +4,15 @@ import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import GrammarHub from './pages/grammar/GrammarHub'
 import Articles from './pages/grammar/Articles'
-import Prepositions from './pages/grammar/Prepositions'
-import Tenses from './pages/grammar/Tenses'
-import Voice from './pages/grammar/Voice'
-import ReportedSpeech from './pages/grammar/ReportedSpeech'
-import QuestionTags from './pages/grammar/QuestionTags'
-import Causatives from './pages/grammar/Causatives'
-import SubjectVerb from './pages/grammar/SubjectVerb'
+import {
+    Prepositions,
+    Tenses,
+    Voice,
+    ReportedSpeech,
+    QuestionTags,
+    Causatives,
+    SubjectVerb
+} from './pages/grammar'
 import WritingHub from './pages/writing/WritingHub'
 import GKQuiz from './pages/quiz/GKQuiz'
 
