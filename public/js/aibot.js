@@ -1,9 +1,11 @@
 /**
  * AI Navigation Bot - SEE English Learning Hub
- * Fully AI-powered with Gemini API - No preset answers
- * Debug mode enabled for troubleshooting
+ * Using official Google GenAI SDK
  * Author: Nabaraj Dhungana
  */
+
+// Import Google GenAI SDK
+import { GoogleGenAI } from "https://esm.sh/@google/genai";
 
 class AINavigationBot {
   constructor() {
@@ -11,8 +13,9 @@ class AINavigationBot {
     this.apiKey = 'AIzaSyCly62RzzM1dgd6ALgj6HpflaSsl2zaayU';
     this.websiteContext = this.getWebsiteContext();
     this.conversationHistory = [];
-    this.debugMode = true; // Enable debug mode
+    this.debugMode = true;
     this.debugLogs = [];
+    this.genAI = null;
     this.init();
   }
 
@@ -56,23 +59,24 @@ class AINavigationBot {
   }
 
   init() {
+    // Initialize GenAI
+    try {
+      this.genAI = new GoogleGenAI({ apiKey: this.apiKey });
+      this.logDebug('System', 'Google GenAI SDK initialized successfully');
+    } catch (error) {
+      this.logDebug('Error', 'Failed to initialize GenAI SDK', { message: error.message });
+    }
+    
     this.createBotHTML();
     this.attachEventListeners();
     this.showWelcomeMessage();
-    this.logDebug('System', 'AI Bot initialized successfully');
   }
 
   logDebug(type, message, data = null) {
     const timestamp = new Date().toLocaleTimeString();
-    const logEntry = {
-      timestamp,
-      type,
-      message,
-      data
-    };
+    const logEntry = { timestamp, type, message, data };
     this.debugLogs.push(logEntry);
     
-    // Keep only last 50 logs
     if (this.debugLogs.length > 50) {
       this.debugLogs.shift();
     }
@@ -191,80 +195,49 @@ class AINavigationBot {
   }
 
   async testConnection() {
-    this.logDebug('API', 'Testing Gemini API connection...');
+    this.logDebug('API', 'Testing Gemini API with GenAI SDK...');
     this.showLoading();
     
-    // Test with both direct and proxy
-    const tests = [
-      { name: 'Direct Connection', useProxy: false },
-      { name: 'CORS Proxy', useProxy: true }
-    ];
-    
-    for (const test of tests) {
-      try {
-        this.logDebug('API', `Trying ${test.name}...`);
-        
-        const url = test.useProxy 
-          ? 'https://corsproxy.io/?' + encodeURIComponent(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`)
-          : `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`;
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: "Say 'API Connection Successful' if you receive this message." }]
-            }],
-            generationConfig: {
-              temperature: 0.1,
-              maxOutputTokens: 50
-            }
-          })
-        });
-
-        this.hideLoading();
-        
-        this.logDebug('API', `${test.name} - Status: ${response.status}`);
-        
-        if (!response.ok) {
-          const errorData = await response.text();
-          this.logDebug('Warning', `${test.name} failed: ${response.status}`, errorData);
-          continue; // Try next method
-        }
-
-        const data = await response.json();
-        this.logDebug('Success', `${test.name} successful!`, data);
-        
-        if (data.candidates && data.candidates[0]) {
-          this.addMessage(`✅ <strong>API Connection Successful!</strong><br><br>
-            <strong>Method:</strong> ${test.name}<br>
-            <strong>Status:</strong> ${response.status} OK<br>
-            <strong>AI Response:</strong> "${data.candidates[0].content.parts[0].text}"<br><br>
-            The API is working correctly! ${test.useProxy ? 'Using CORS proxy for compatibility.' : 'Direct connection working.'}`, 'bot');
-          return;
-        }
-      } catch (error) {
-        this.logDebug('Error', `${test.name} exception`, { message: error.message });
-        // Continue to next test method
+    try {
+      if (!this.genAI) {
+        throw new Error('GenAI SDK not initialized');
       }
+      
+      const startTime = Date.now();
+      
+      const response = await this.genAI.models.generateContent({
+        model: "gemini-pro",
+        contents: "Say 'API Connection Successful using Google GenAI SDK' if you receive this.",
+      });
+      
+      const duration = Date.now() - startTime;
+      this.hideLoading();
+      
+      this.logDebug('Success', `API Test Successful in ${duration}ms`, { response: response.text });
+      
+      this.addMessage(`✅ <strong>API Connection Successful!</strong><br><br>
+        <strong>Method:</strong> Google GenAI SDK<br>
+        <strong>Response Time:</strong> ${duration}ms<br>
+        <strong>AI Response:</strong> "${response.text}"<br><br>
+        The API is working correctly with the official SDK!`, 'bot');
+        
+    } catch (error) {
+      this.hideLoading();
+      this.logDebug('Error', 'API Test Failed', { message: error.message, stack: error.stack });
+      
+      this.addMessage(`❌ <strong>Connection Error</strong><br><br>
+        <strong>Error:</strong> ${error.message}<br><br>
+        <strong>This might be caused by:</strong><br>
+        • Browser extensions blocking the SDK<br>
+        • Network connectivity issues<br>
+        • Invalid API key<br><br>
+        <strong>Solutions:</strong><br>
+        1. Try Incognito/Private mode (disables extensions)<br>
+        2. Check your internet connection<br>
+        3. Disable ad blockers temporarily<br>
+        4. Use a different browser<br><br>
+        <em>Check the debug console for technical details.</em>`, 'bot');
     }
-    
-    // All tests failed
-    this.hideLoading();
-    this.addMessage(`❌ <strong>Connection Failed</strong><br><br>
-      <strong>Issue:</strong> Browser extensions are blocking the API calls.<br><br>
-      <strong>Common Culprits:</strong><br>
-      • Ad blockers (uBlock Origin, AdBlock Plus)<br>
-      • Privacy extensions (Privacy Badger, HTTPS Everywhere)<br>
-      • Security extensions<br><br>
-      <strong>Solutions:</strong><br>
-      1. Disable browser extensions temporarily<br>
-      2. Try Incognito/Private browsing mode<br>
-      3. Use a different browser (Chrome, Firefox, Edge)<br>
-      4. Disable "Enable network monitoring" in developer tools<br><br>
-      <strong>Note:</strong> This is a browser security feature, not a code issue.`, 'bot');
   }
 
   attachEventListeners() {
@@ -366,9 +339,13 @@ class AINavigationBot {
     // Show loading
     this.showLoading();
 
-    // Always call Gemini API
+    // Call Gemini API using GenAI SDK
     try {
-      this.logDebug('API', 'Calling Gemini API...', { message: message.substring(0, 100) });
+      if (!this.genAI) {
+        throw new Error('AI SDK not initialized. Please refresh the page.');
+      }
+      
+      this.logDebug('API', 'Calling Gemini API via GenAI SDK...', { message: message.substring(0, 100) });
       const startTime = Date.now();
       
       const response = await this.callGeminiAPI(message);
@@ -383,15 +360,16 @@ class AINavigationBot {
       this.hideLoading();
       this.logDebug('Error', 'API Call Failed', { message: error.message, stack: error.stack });
       
-      // Show detailed error
       this.addMessage(`⚠️ <strong>Connection Error</strong><br><br>
         <strong>Error:</strong> ${error.message}<br><br>
-        <strong>Troubleshooting:</strong><br>
-        1. Check your internet connection<br>
-        2. Click "<i class='fas fa-bug'></i> Debug" button above<br>
-        3. Click "<i class='fas fa-plug'></i> Test API" to diagnose<br><br>
-        <strong>Technical Details:</strong><br>
-        <span style="font-family: monospace; font-size: 0.8rem; color: #ff6b6b;">${error.stack || 'No stack trace'}</span>`, 'bot');
+        <strong>This is likely caused by browser extensions.</strong><br><br>
+        <strong>Quick Fix - Try Incognito Mode:</strong><br>
+        Press <kbd>Ctrl+Shift+N</kbd> (Chrome) or <kbd>Ctrl+Shift+P</kbd> (Firefox)<br><br>
+        <strong>Or disable these temporarily:</strong><br>
+        • Ad blockers (uBlock, AdBlock Plus)<br>
+        • Privacy extensions (Privacy Badger)<br>
+        • HTTPS Everywhere<br><br>
+        <em>The extensions are blocking the AI SDK from connecting to Google.</em>`, 'bot');
     }
   }
 
@@ -428,89 +406,21 @@ RESPONSE STYLE:
 - Always provide fresh, unique content
 - Never use preset templates
 
-IMPORTANT: Generate unique, contextual responses every time. Do not use generic templates.
-
 User question: ${userMessage}`;
 
-    // Try direct API call first
-    let response;
-    try {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: systemPrompt }]
-          }],
-          generationConfig: {
-            temperature: 0.8,
-            maxOutputTokens: 800,
-            topP: 0.9,
-            topK: 40
-          }
-        })
-      });
-    } catch (fetchError) {
-      this.logDebug('Error', 'Direct fetch failed, trying CORS proxy', { error: fetchError.message });
-      
-      // If direct fetch fails (CORS/extension blocker), try with CORS proxy
-      try {
-        response = await fetch('https://corsproxy.io/?' + encodeURIComponent(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: systemPrompt }]
-            }],
-            generationConfig: {
-              temperature: 0.8,
-              maxOutputTokens: 800,
-              topP: 0.9,
-              topK: 40
-            }
-          })
-        });
-        this.logDebug('Success', 'CORS proxy worked');
-      } catch (proxyError) {
-        this.logDebug('Error', 'CORS proxy also failed', { error: proxyError.message });
-        throw new Error(`Browser blocked the request. This is usually caused by:<br><br>
-          1. <strong>Ad Blocker</strong> - Disable ad blockers for this site<br>
-          2. <strong>Privacy Extension</strong> - Check extensions like Privacy Badger, uBlock Origin<br>
-          3. <strong>CORS Policy</strong> - Browser security blocking cross-origin requests<br><br>
-          <strong>Solutions:</strong><br>
-          • Disable browser extensions temporarily<br>
-          • Try in Incognito/Private mode<br>
-          • Use a different browser<br><br>
-          Original error: ${fetchError.message}`);
+    const response = await this.genAI.models.generateContent({
+      model: "gemini-pro",
+      contents: systemPrompt,
+      generationConfig: {
+        temperature: 0.8,
+        maxOutputTokens: 800,
+        topP: 0.9,
+        topK: 40
       }
-    }
-
-    this.logDebug('API', `HTTP Status: ${response.status}`, { 
-      status: response.status, 
-      statusText: response.statusText,
-      headers: Object.fromEntries(response.headers.entries())
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      this.logDebug('Error', 'HTTP Error Response', { status: response.status, body: errorText });
-      throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${errorText.substring(0, 200)}`);
-    }
-
-    const data = await response.json();
-    this.logDebug('API', 'Response data received', data);
-    
-    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-      return data.candidates[0].content.parts[0].text;
-    }
-    
-    if (data.error) {
-      throw new Error(`API Error: ${data.error.message}`);
+    if (response && response.text) {
+      return response.text;
     }
     
     throw new Error('Invalid API response structure');
@@ -519,7 +429,6 @@ User question: ${userMessage}`;
   handleNavigationCommand(message) {
     const lowerMsg = message.toLowerCase();
     
-    // Grammar navigation
     if (lowerMsg.includes('grammar') || lowerMsg.includes('article') || lowerMsg.includes('preposition') || 
         lowerMsg.includes('tense') || lowerMsg.includes('voice') || lowerMsg.includes('speech') ||
         lowerMsg.includes('question tag') || lowerMsg.includes('causative')) {
@@ -527,7 +436,6 @@ User question: ${userMessage}`;
       return true;
     }
     
-    // Writing navigation
     if (lowerMsg.includes('writing') || lowerMsg.includes('essay') || lowerMsg.includes('letter') || 
         lowerMsg.includes('application') || lowerMsg.includes('dialogue') || lowerMsg.includes('paragraph') ||
         lowerMsg.includes('notice') || lowerMsg.includes('recipe') || lowerMsg.includes('chart')) {
@@ -535,14 +443,12 @@ User question: ${userMessage}`;
       return true;
     }
     
-    // Quiz navigation
     if (lowerMsg.includes('quiz') || lowerMsg.includes('test') || lowerMsg.includes('practice') || 
         lowerMsg.includes('gk') || lowerMsg.includes('exam')) {
       this.showQuizMenu();
       return true;
     }
     
-    // Home navigation
     if (lowerMsg.includes('home') || lowerMsg.includes('main') || lowerMsg.includes('start')) {
       return `🏠 <a href="index.html" class="nav-link-btn" style="font-size: 1rem;"><i class="fas fa-home"></i> Go to Homepage</a>`;
     }
@@ -552,32 +458,30 @@ User question: ${userMessage}`;
 
   async generatePracticeQuestion() {
     this.showLoading();
-    this.logDebug('API', 'Generating practice question...');
+    this.logDebug('API', 'Generating practice question with GenAI SDK...');
     
-    const prompt = `Generate a unique multiple choice English grammar question suitable for SEE exam level in Nepal. 
-    The question should be different every time. Include 4 options (A, B, C, D), indicate the correct answer letter, and provide a detailed explanation.
-    Focus on: articles, prepositions, tenses, voice, or reported speech.
-    Make it challenging but appropriate for SEE students.
-    Format: Question|OptionA|OptionB|OptionC|OptionD|CorrectLetter|Explanation`;
-
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.9, maxOutputTokens: 500 }
-        })
+      if (!this.genAI) {
+        throw new Error('AI SDK not initialized');
+      }
+      
+      const prompt = `Generate a unique multiple choice English grammar question suitable for SEE exam level in Nepal. 
+      Include 4 options (A, B, C, D), indicate the correct answer letter, and provide a detailed explanation.
+      Focus on: articles, prepositions, tenses, voice, or reported speech.
+      Format: Question|OptionA|OptionB|OptionC|OptionD|CorrectLetter|Explanation`;
+
+      const response = await this.genAI.models.generateContent({
+        model: "gemini-pro",
+        contents: prompt,
+        generationConfig: {
+          temperature: 0.9,
+          maxOutputTokens: 500
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const text = data.candidates[0].content.parts[0].text;
-      
       this.hideLoading();
+      
+      const text = response.text;
       this.logDebug('Success', 'Practice question generated');
       
       // Parse the response
@@ -585,14 +489,14 @@ User question: ${userMessage}`;
       if (parts.length >= 7) {
         this.showPracticeQuestion(parts[0], parts.slice(1, 5), parts[5], parts[6]);
       } else {
-        this.logDebug('Warning', 'Invalid question format received', { text });
+        this.logDebug('Warning', 'Invalid question format', { text });
         this.addMessage("I got a response but couldn't parse it properly. Let me try again...", 'bot');
         setTimeout(() => this.generatePracticeQuestion(), 1000);
       }
     } catch (error) {
       this.hideLoading();
       this.logDebug('Error', 'Failed to generate question', { message: error.message });
-      this.addMessage("⚠️ I couldn't generate a question right now. Please check the debug console for details. Click the Debug button above.", 'bot');
+      this.addMessage("⚠️ I couldn't generate a question. This is likely due to browser extensions blocking the AI. Try Incognito mode (Ctrl+Shift+N).", 'bot');
     }
   }
 
@@ -668,7 +572,7 @@ User question: ${userMessage}`;
   showWelcomeMessage() {
     setTimeout(() => {
       this.addMessage(`👋 <strong>Welcome to SEE English Learning Hub!</strong><br><br>
-        I'm your AI tutor, powered by advanced AI to help you excel in your SEE English exam.<br><br>
+        I'm your AI tutor, powered by Google's advanced AI to help you excel in your SEE English exam.<br><br>
         <strong>What I can do:</strong><br>
         📚 <strong>Teach</strong> - Explain grammar & writing concepts<br>
         ✍️ <strong>Guide</strong> - Show you writing formats & templates<br>
@@ -678,7 +582,7 @@ User question: ${userMessage}`;
         Paschimanchal English School</em><br><br>
         Try the buttons below or type your question!<br><br>
         <span style="font-size: 0.8rem; color: var(--text-secondary);">
-          <i class="fas fa-bug"></i> Having issues? Click the "Debug" button above to diagnose.
+          <i class="fas fa-info-circle"></i> If AI doesn't respond, try <kbd>Ctrl+Shift+N</kbd> (Incognito mode)
         </span>`, 'bot');
     }, 1000);
   }
