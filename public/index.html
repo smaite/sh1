@@ -8,6 +8,9 @@
   <meta name="keywords" content="SEE, English, Grammar, Writing, Nepal, Education, Nabaraj Dhungana">
   <meta name="author" content="Nabaraj Dhungana">
   
+  <!-- Content Security Policy - Allow Google API and ESM -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://esm.sh; img-src 'self' data:;">
+   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,6 +20,15 @@
   
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- Import Map for Google GenAI SDK -->
+  <script type="importmap">
+  {
+    "imports": {
+      "@google/genai": "https://esm.sh/@google/genai"
+    }
+  }
+  </script>
   
   <!-- Styles -->
   <link rel="stylesheet" href="css/main.css">
@@ -30,7 +42,7 @@
   <header>
     <div class="container">
       <h1 class="glow-text">SEE English Learning Hub</h1>
-      <p>Master English Grammar & Writing Skills | Interactive Learning</p>
+      <p>Master English Grammar & Writing Skills | AI-Powered Learning</p>
       
       <div class="hero-stats">
         <div class="stat-card">
@@ -58,167 +70,73 @@
     <div class="container">
       <ul>
         <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
-        <li><a href="#grammar" class="nav-link"><i class="fas fa-book"></i> Grammar</a></li>
-        <li><a href="#writing" class="nav-link"><i class="fas fa-pen"></i> Writing</a></li>
+        <li><a href="content/grammar/articles/index.html" class="nav-link"><i class="fas fa-book"></i> Grammar</a></li>
         <li><a href="content/gk/index.html" class="nav-link"><i class="fas fa-brain"></i> GK Quiz</a></li>
         <li><a href="#about" class="nav-link"><i class="fas fa-user"></i> About</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Grammar Section -->
-  <section id="grammar" class="section">
+  <!-- Main Content -->
+  <section class="section">
     <div class="container">
-      <h2 class="section-title">Learn Grammar Through Games</h2>
+      <h2 class="section-title">Start Learning with AI</h2>
       
-      <div class="topics-grid">
-        <a href="content/grammar/articles/index.html" class="topic-card">
-          <i class="fas fa-circle"></i>
-          <h3>Articles</h3>
-          <p>Master the art of using a, an, and the correctly.</p>
-        </a>
-        
-        <a href="content/grammar/preposition/index.html" class="topic-card">
-          <i class="fas fa-map-marker-alt"></i>
-          <h3>Prepositions</h3>
-          <p>Navigate relationships with in, on, at, and more.</p>
-        </a>
-        
-        <a href="content/grammar/tenses/index.html" class="topic-card">
-          <i class="fas fa-clock"></i>
-          <h3>Tenses</h3>
-          <p>Travel through time with past, present, and future.</p>
-        </a>
-        
-        <a href="content/grammar/voice/index.html" class="topic-card">
-          <i class="fas fa-exchange-alt"></i>
-          <h3>Active & Passive Voice</h3>
-          <p>Master the art of voice transformation.</p>
-        </a>
-        
-        <a href="content/grammar/reported-speech/index.html" class="topic-card">
-          <i class="fas fa-comments"></i>
-          <h3>Reported Speech</h3>
-          <p>Convert direct speech to indirect speech.</p>
-        </a>
-        
-        <a href="content/grammar/question-tags/index.html" class="topic-card">
-          <i class="fas fa-question-circle"></i>
-          <h3>Question Tags</h3>
-          <p>Add magic to your statements with question tags.</p>
-        </a>
-        
-        <a href="content/grammar/causatives/index.html" class="topic-card">
-          <i class="fas fa-hand-point-right"></i>
-          <h3>Causative Verbs</h3>
-          <p>Make things happen with have, make, get, let.</p>
-        </a>
-        
-        <a href="content/grammar/subject-verb/index.html" class="topic-card">
-          <i class="fas fa-handshake"></i>
-          <h3>Subject-Verb Agreement</h3>
-          <p>Build sentences with proper syntax.</p>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Writing Section -->
-  <section id="writing" class="section">
-    <div class="container">
-      <h2 class="section-title">Develop Your Writing Skills</h2>
-      
-      <!-- Guided Writing I -->
-      <div class="subsection">
-        <h3><i class="fas fa-layer-group"></i> Guided Writing I (5 Marks)</h3>
-        <div class="topics-grid">
-          <a href="content/writing/paragraph/index.html" class="topic-card">
-            <i class="fas fa-paragraph"></i>
-            <h3>Paragraph Writing</h3>
-            <p>Turn ideas into well-structured paragraphs.</p>
+      <div class="subsection" style="text-align: center; padding: 40px;">
+        <h3 style="margin-bottom: 20px;"><i class="fas fa-robot"></i> AI-Powered Learning</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 30px; color: var(--text-secondary);">
+          Click the robot icon in the bottom right corner to chat with your AI English tutor.<br>
+          Ask questions, get practice questions, and learn anything about English!
+        </p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+          <a href="content/grammar/articles/index.html" class="btn-primary">
+            <i class="fas fa-book"></i> Learn Articles
           </a>
-          
-          <a href="content/writing/chart/index.html" class="topic-card">
-            <i class="fas fa-chart-bar"></i>
-            <h3>Chart Interpretation</h3>
-            <p>Interpret data from charts and tables.</p>
+          <a href="content/grammar/articles/quiz.html" class="btn-primary">
+            <i class="fas fa-question-circle"></i> Articles Quiz
           </a>
-          
-          <a href="content/writing/instruction/index.html" class="topic-card">
-            <i class="fas fa-tasks"></i>
-            <h3>Instruction Writing</h3>
-            <p>Write clear step-by-step instructions.</p>
-          </a>
-          
-          <a href="content/writing/recipe/index.html" class="topic-card">
-            <i class="fas fa-utensils"></i>
-            <h3>Recipe Writing</h3>
-            <p>Write delicious recipes step by step.</p>
-          </a>
-          
-          <a href="content/writing/advertisement/index.html" class="topic-card">
-            <i class="fas fa-ad"></i>
-            <h3>Advertisement Writing</h3>
-            <p>Learn the art of persuasive ads.</p>
-          </a>
-          
-          <a href="content/writing/notice/index.html" class="topic-card">
-            <i class="fas fa-sticky-note"></i>
-            <h3>Notice Writing</h3>
-            <p>Write clear and concise notices.</p>
+          <a href="content/gk/index.html" class="btn-primary">
+            <i class="fas fa-brain"></i> GK Quiz
           </a>
         </div>
       </div>
 
-      <!-- Free Writing -->
-      <div class="subsection">
-        <h3><i class="fas fa-feather-alt"></i> Free Writing (6-8 Marks)</h3>
-        <div class="topics-grid">
-          <a href="content/writing/essay/index.html" class="topic-card">
-            <i class="fas fa-file-alt"></i>
-            <h3>Essay Writing</h3>
-            <p>From introduction to conclusion.</p>
-          </a>
-          
-          <a href="content/writing/letters/index.html" class="topic-card">
-            <i class="fas fa-envelope"></i>
-            <h3>Letter Writing</h3>
-            <p>Personal and official letters.</p>
-          </a>
-          
-          <a href="content/writing/application/index.html" class="topic-card">
-            <i class="fas fa-file-signature"></i>
-            <h3>Applications</h3>
-            <p>Job and leave applications.</p>
-          </a>
-          
-          <a href="content/writing/dialogue/index.html" class="topic-card">
-            <i class="fas fa-comment-dots"></i>
-            <h3>Dialogue Writing</h3>
-            <p>Create authentic conversations.</p>
-          </a>
-          
-          <a href="content/writing/news/index.html" class="topic-card">
-            <i class="fas fa-newspaper"></i>
-            <h3>News Writing</h3>
-            <p>Write compelling news stories.</p>
-          </a>
-          
-          <a href="content/writing/review/index.html" class="topic-card">
-            <i class="fas fa-film"></i>
-            <h3>Movie/Book Reviews</h3>
-            <p>Write insightful reviews.</p>
-          </a>
+      <div class="subsection" style="margin-top: 40px;">
+        <h3 style="margin-bottom: 20px;"><i class="fas fa-star"></i> What You Can Do</h3>
+        <div class="topics-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <div class="topic-card" style="cursor: default;">
+            <i class="fas fa-comments"></i>
+            <h3>Ask AI Tutor</h3>
+            <p>Get instant answers to any English question from our AI teacher.</p>
+          </div>
+          <div class="topic-card" style="cursor: default;">
+            <i class="fas fa-dumbbell"></i>
+            <h3>Practice Questions</h3>
+            <p>Unlimited AI-generated practice questions with explanations.</p>
+          </div>
+          <div class="topic-card" style="cursor: default;">
+            <i class="fas fa-graduation-cap"></i>
+            <h3>Learn Grammar</h3>
+            <p>Master articles, tenses, voice, and all grammar concepts.</p>
+          </div>
+          <div class="topic-card" style="cursor: default;">
+            <i class="fas fa-pen"></i>
+            <h3>Writing Skills</h3>
+            <p>Learn essay, letter, and application writing for SEE exam.</p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="footer">
+  <footer class="footer" id="about">
     <div class="container">
       <p>&copy; 2024 SEE English Learning Hub. Developed with <i class="fas fa-heart" style="color: #f5576c;"></i> by <strong>Nabaraj Dhungana</strong></p>
       <p style="margin-top: 10px; font-size: 0.9rem;">Paschimanchal English School, Siddharthanagar-6, Rupandehi</p>
+      <p style="margin-top: 5px; font-size: 0.85rem; color: var(--text-secondary);">
+        <i class="fas fa-envelope"></i> ndhungana2076@gmail.com
+      </p>
     </div>
   </footer>
 
